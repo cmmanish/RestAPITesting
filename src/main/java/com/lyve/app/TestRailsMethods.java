@@ -14,6 +14,9 @@ import java.util.Map;
  */
 public class TestRailsMethods {
 
+    //Project 12
+    //Suite 16047
+    //Section
     private final static Logger log = Logger.getLogger(TestRailsMethods.class);
     private static TestRailsMethods instance;
     private String BaseURL = "";
@@ -77,7 +80,7 @@ public class TestRailsMethods {
             jObject = (JSONObject) jArray.get(i);
 
             log.info(jObject.toString());
-            //log.info("SuiteName: " + jObject.get("name"));
+            log.info("SuiteName: " + jObject.get("name"));
         }
     }
 
@@ -100,10 +103,29 @@ public class TestRailsMethods {
             log.info(jObject.toString());
             log.info("SuiteName: " + jObject.get("name"));
             sectionNo = jObject.get("id").toString();
-            log.info("id: " + sectionNo);
+            log.info("sectionNo: " + sectionNo);
         }
         return sectionNo;
     }
+
+    public String getCasesFromSuitesANDSection(String reqParameter) throws Exception {
+
+        //get_cases/<suite_id>/<section_id>
+        APIClient client = new APIClient(BaseURL);
+        client.setUser(TRUserName);
+        client.setPassword(TRPassword);
+        JSONArray jArray = (JSONArray) client.sendGet(reqParameter);
+        JSONObject jObject = null;
+        String sectionNo = "";
+        log.info("TestCase Count: "+ jArray.size());
+        for (int i = 0; i < jArray.size(); i++) {
+            jObject = (JSONObject) jArray.get(i);
+            log.info("TestCase id: " + jObject.get("id")+ " TestCase title: " + jObject.get("title"));
+        }
+        return sectionNo;
+    }
+
+
 
     public void deleteSection(String reqParameter, Integer sectionNo) throws Exception {
 
@@ -115,6 +137,7 @@ public class TestRailsMethods {
         data.put("delete_section",sectionNo);
         JSONObject jObject = (JSONObject) client.sendPost(reqParameter, data);
         log.info(jObject);
+        log.info("SectionNo "+ sectionNo +" Deleted successfully");
 
     }
 
@@ -126,17 +149,19 @@ public class TestRailsMethods {
         JSONObject jObject = (JSONObject) client.sendGet(reqParameter);
         log.info(jObject.toJSONString().toString());
 
-
     }
 
     public static void main(String args[]) throws Exception {
 
         //TestRailsMethods.getInstance().getProjectsList("get_projects");
         //TestRailsMethods.getInstance().getEachProject("get_project/12");
-        //TestRailsMethods.getInstance().getSuitesFromAProject("get_suites/12");
+        TestRailsMethods.getInstance().getSuitesFromAProject("get_suites/12");
         String sectionNo = TestRailsMethods.getInstance().getSectionsFromAProjectANDSuites("/get_sections/12&suite_id=16047");
-        log.info(sectionNo);
-        TestRailsMethods.getInstance().deleteSection("/delete_section/28995",28995);
+        log.info("sectionNo: "+sectionNo);
+
+        TestRailsMethods.getInstance().getCasesFromSuitesANDSection("/get_cases/12&suite_id=16047");
+
+        TestRailsMethods.getInstance().deleteSection("/delete_section/"+sectionNo,Integer.parseInt(sectionNo));
 
 
     }
