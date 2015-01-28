@@ -5,6 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,8 @@ public class TestRailsMethods {
 
         try {
 
-            Object obj = parser.parse(new FileReader("/Users/mmadhusoodan/.testrailreporter.json"));
+            File file = new File("testrail_scripts/.testrailreporter.json");
+            Object obj = parser.parse(new FileReader(file));
 
             JSONObject jsonObject = (JSONObject) obj;
 
@@ -155,11 +157,11 @@ public class TestRailsMethods {
 
         //TestRailsMethods.getInstance().getProjectsList("get_projects");
         //TestRailsMethods.getInstance().getEachProject("get_project/12");
-        TestRailsMethods.getInstance().getSuitesFromAProject("get_suites/12");
+        //TestRailsMethods.getInstance().getSuitesFromAProject("get_suites/12");
         String sectionNo = TestRailsMethods.getInstance().getSectionsFromAProjectANDSuites("/get_sections/12&suite_id=16047");
         log.info("sectionNo: "+sectionNo);
 
-        TestRailsMethods.getInstance().getCasesFromSuitesANDSection("/get_cases/12&suite_id=16047");
+        //TestRailsMethods.getInstance().getCasesFromSuitesANDSection("/get_cases/12&suite_id=16047");
 
         TestRailsMethods.getInstance().deleteSection("/delete_section/"+sectionNo,Integer.parseInt(sectionNo));
 
