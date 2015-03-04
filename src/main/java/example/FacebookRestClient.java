@@ -1,16 +1,17 @@
-package com.lyve.app;
+package example;
 
 /**
  * Created by mmadhusoodan on 12/11/14.
  */
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class FacebookRestClient {
@@ -34,7 +35,7 @@ public class FacebookRestClient {
         return instance;
     }
 
-    public void sendGet(){
+    public void sendGet() {
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -46,14 +47,13 @@ public class FacebookRestClient {
             JSONResponse = jsonMapper.readValue(response, HashMap.class);
             cityArrayList = JSONResponse.get(DATA);
 
-            for (int i=0; i < cityArrayList.size(); i++){
+            for (int i = 0; i < cityArrayList.size(); i++) {
                 String city = cityArrayList.get(i).get("name");
                 log.info(city);
             }
 
-        }
-        catch (IOException e){
-               e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

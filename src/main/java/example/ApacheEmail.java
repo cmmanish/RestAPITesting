@@ -1,4 +1,4 @@
-package com.lyve.app;
+package example;
 
 import org.apache.commons.mail.*;
 
@@ -40,7 +40,7 @@ public class ApacheEmail {
         System.out.println("Sent message successfully....sendHtmlEmail");
     }
 
-    public void sendEmailAttachment(String toEmail, String attachmentName, String reportPath ) throws Exception{
+    public void sendEmailAttachment(String toEmail, String attachmentName, String reportPath) throws Exception {
 
         // Create the attachment
         EmailAttachment attachment = new EmailAttachment();
@@ -60,7 +60,7 @@ public class ApacheEmail {
         email.addTo(toEmail);
         email.setSubject("TestMailAttachment");
         email.setMsg("This is a test mail ... :-)");
-         // add the attachment
+        // add the attachment
         email.attach(attachment);
 
         // send the email
@@ -74,7 +74,7 @@ public class ApacheEmail {
         ApacheEmail email = new ApacheEmail();
 
         //email.sendSimpleMail();
-        email.sendEmailAttachment("mmadhusoodan@lyveminds.com","2015-01-09Report", "reports/2015-01-09Report.png");
+        email.sendEmailAttachment("mmadhusoodan@lyveminds.com", "2015-01-09Report", "reports/2015-01-09Report.png");
         //email.sendHtmlEmail();
     }
 }

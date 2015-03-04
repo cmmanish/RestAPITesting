@@ -1,4 +1,4 @@
-package com.lyve.app;
+package example;
 
 /**
  * Created by mmadhusoodan on 1/27/15.
@@ -20,15 +20,17 @@ public class ConnectHttps {
      *           PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException:
      *               unable to find valid certification path to requested target
      */
-        TrustManager[] trustAllCerts = new TrustManager[] {
+        TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
                     public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }
 
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {  }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
 
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {  }
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
 
                 }
         };
@@ -54,10 +56,10 @@ public class ConnectHttps {
         Reader reader = new InputStreamReader(con.getInputStream());
         while (true) {
             int ch = reader.read();
-            if (ch==-1) {
+            if (ch == -1) {
                 break;
             }
-            System.out.print((char)ch);
+            System.out.print((char) ch);
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.lyve.app;
+package example;
 
 /**
  * Created by mmadhusoodan on 12/18/14.

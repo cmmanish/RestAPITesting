@@ -1,4 +1,4 @@
-package com.lyve.app;
+package example;
 
 /**
  * Created by mmadhusoodan on 1/27/15.
@@ -25,7 +25,7 @@ public class HttpURLConnectionExample {
         return instance;
     }
 
-    private final static Logger log = Logger.getLogger(MeshServicesTestClient.class);
+    private final static Logger log = Logger.getLogger(MeshServicesUsingCURL.class);
     private String envelopeHeaders = " -H 'X-BP-Envelope: EgIIARoBMQ==' ";
 
     private String tokenHeaders = " -H 'X-BP-Token: MSwxLE5Lb05Uc0ZEbDA2RnBGYjlVUGVMcWc9PSxzRXkzNFJXQTh0SjJzQXVYc1Z6akswY0h4UDdqMzJ3OEZ2MHlBN1E5SUxRWmhXRklCV1hRZjEyZlV6T1ZoK0duNlZnTUhvL2N6cVZRcjlXeGdZWThzTmkrSWo1azVVZW92c0NpdkhkQ05HYkVnR0prQWQrM2NoSU5DMGFUZ1c0MDJGUjBpZU81djdFRGx4RS9xM0NKdEhBRElieVJEQUhPSWVMNEhtb3IxVUk9' ";
@@ -43,7 +43,7 @@ public class HttpURLConnectionExample {
 
         HttpURLConnectionExample http = new HttpURLConnectionExample();
 
-        log.info("Testing 1 - Send Http GET request accountExists()");
+        log.info("Testing 1 - Send Http GET request meshIDForAccount()");
         String encodedEmail = "portal_test_01%40lyveminds.com";
         HttpURLConnectionExample.getInstance().accountExists(encodedEmail);
 

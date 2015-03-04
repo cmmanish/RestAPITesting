@@ -1,11 +1,10 @@
-package com.lyve.app;
+package example;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -68,7 +67,7 @@ public class APIClient {
      * is basically the same as java.util.Map.
      */
     public Object sendGet(String uri)
-            throws MalformedURLException, IOException, APIException {
+            throws IOException, APIException {
         return this.sendRequest("GET", uri, null);
     }
 
@@ -91,12 +90,12 @@ public class APIClient {
      * is basically the same as java.util.Map.
      */
     public Object sendPost(String uri, Object data)
-            throws MalformedURLException, IOException, APIException {
+            throws IOException, APIException {
         return this.sendRequest("POST", uri, data);
     }
 
     private Object sendRequest(String method, String uri, Object data)
-            throws MalformedURLException, IOException, APIException {
+            throws IOException, APIException {
         URL url = new URL(this.m_url + uri);
 
         // Create the connection object and set the required HTTP method

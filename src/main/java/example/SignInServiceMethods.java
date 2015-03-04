@@ -1,4 +1,4 @@
-package com.lyve.app;
+package example;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -44,10 +44,10 @@ public class SignInServiceMethods {
             e.printStackTrace();
         }
     }
-    
+
     public static void main(String args[]) throws Exception {
 
-        String encodedEmail = "gatling_test_01%40lyveminds.com";
+        String encodedEmail = "gatling_test_01@lyveminds.com";
         SignInServiceMethods.getInstance().accountExists(encodedEmail);
 
 

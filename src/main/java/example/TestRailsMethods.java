@@ -1,4 +1,4 @@
-package com.lyve.app;
+package example;
 
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
@@ -119,14 +119,13 @@ public class TestRailsMethods {
         JSONArray jArray = (JSONArray) client.sendGet(reqParameter);
         JSONObject jObject = null;
         String sectionNo = "";
-        log.info("TestCase Count: "+ jArray.size());
+        log.info("TestCase Count: " + jArray.size());
         for (int i = 0; i < jArray.size(); i++) {
             jObject = (JSONObject) jArray.get(i);
-            log.info("TestCase id: " + jObject.get("id")+ " TestCase title: " + jObject.get("title"));
+            log.info("TestCase id: " + jObject.get("id") + " TestCase title: " + jObject.get("title"));
         }
         return sectionNo;
     }
-
 
 
     public void deleteSection(String reqParameter, Integer sectionNo) throws Exception {
@@ -136,10 +135,10 @@ public class TestRailsMethods {
         client.setPassword(TRPassword);
 
         Map data = new HashMap();
-        data.put("delete_section",sectionNo);
+        data.put("delete_section", sectionNo);
         JSONObject jObject = (JSONObject) client.sendPost(reqParameter, data);
         log.info(jObject);
-        log.info("SectionNo "+ sectionNo +" Deleted successfully");
+        log.info("SectionNo " + sectionNo + " Deleted successfully");
 
     }
 
@@ -159,11 +158,11 @@ public class TestRailsMethods {
         //TestRailsMethods.getInstance().getEachProject("get_project/12");
         //TestRailsMethods.getInstance().getSuitesFromAProject("get_suites/12");
         String sectionNo = TestRailsMethods.getInstance().getSectionsFromAProjectANDSuites("/get_sections/12&suite_id=16047");
-        log.info("sectionNo: "+sectionNo);
+        log.info("sectionNo: " + sectionNo);
 
         //TestRailsMethods.getInstance().getCasesFromSuitesANDSection("/get_cases/12&suite_id=16047");
 
-        TestRailsMethods.getInstance().deleteSection("/delete_section/"+sectionNo,Integer.parseInt(sectionNo));
+        //TestRailsMethods.getInstance().deleteSection("/delete_section/"+sectionNo,Integer.parseInt(sectionNo));
 
 
     }
