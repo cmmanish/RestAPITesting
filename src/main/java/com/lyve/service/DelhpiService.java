@@ -13,26 +13,25 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
 public class DelhpiService extends AbsractServicesBaseClass {
-    private Logger log = Logger.getLogger(DelhpiService.class);
+    private static Logger log = Logger.getLogger(DelhpiService.class);
 
     private static DelhpiService instance;
-
-    private Map<String, Map<String, LinkedHashMap>> responseMap;
-    private ObjectMapper jsonMapper = new ObjectMapper();
+    private static CloseableHttpClient httpclient;
 
     public static synchronized DelhpiService getInstance() {
+
+        log.info("In DelhpiService() constructor");
         if (instance == null) {
             instance = new DelhpiService();
         }
@@ -41,10 +40,14 @@ public class DelhpiService extends AbsractServicesBaseClass {
 
     public AgentObject getBlobDetailsFromAgent(JSONObject jAgent, Object OAgentId) {
 
-        AgentObject agentObject = new AgentObject();
+        //AgentObject agentObject = new AgentObject();
         agentObject.agentId = (String) OAgentId;
+        agentObject.deviceClass = (String) jAgent.get("device_class");
+        agentObject.lastSeen = GetHumanReadableDate((Long) jAgent.get("last_seen_ms"), "MM-dd-yyyy HH:mm:ss aa");
+        agentObject.wasOnline = (boolean) jAgent.get("was_online");
+
+        //blob_inventory_detail
         if (!jAgent.get("blob_inventory_detail").toString().contains("{}")) {
-//            log.info(jAgent.get("blob_inventory_detail").toString());
             try {
                 JSONObject blobObject = (JSONObject) jAgent.get("blob_inventory_detail");
 
@@ -75,9 +78,9 @@ public class DelhpiService extends AbsractServicesBaseClass {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
-            //blob_inventory_detail = {}
-//            log.info(jAgent.get("blobs_to_download_details"));
+        }
+        //blobs_to_download_details
+        else if (!jAgent.get("blobs_to_download_details").toString().contains("{}")) {
             try {
                 JSONObject blobToDownloadObject = (JSONObject) jAgent.get("blobs_to_download_details");
                 JSONObject AlternativeCount = (JSONObject) blobToDownloadObject.get("ALTERNATIVE");
@@ -91,10 +94,9 @@ public class DelhpiService extends AbsractServicesBaseClass {
         return agentObject;
     }
 
-    public void getBlobDetailsFromMeshId(CloseableHttpClient httpclient, String meshId) throws Exception {
+    public AgentObject getBlobDetailsFromMeshId(CloseableHttpClient httpclient, String meshId) throws Exception {
 
         String URL = "https://delphi.dogfood.blackpearlsystems.net/delphi/rest/v2/meshstats/" + meshId;
-
         HttpGet httpGet = new HttpGet(URL);
 
         httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
@@ -104,7 +106,6 @@ public class DelhpiService extends AbsractServicesBaseClass {
 
         StatusLine statusLine = httpResponse.getStatusLine();
         int statusCode = statusLine.getStatusCode();
-        log.info("statusCodes: " + statusCode);
 
         String httpStatusMessage = httpResponse.getStatusLine().toString();
         HttpEntity entity = httpResponse.getEntity();
@@ -141,13 +142,7 @@ public class DelhpiService extends AbsractServicesBaseClass {
 
                     for (Object agentIdKey : keySet) {
                         JSONObject jsonAgent = (JSONObject) agentStatsJSONObject.get(agentIdKey);
-                        AgentObject agentObject = getBlobDetailsFromAgent(jsonAgent, agentIdKey);
-
-                        log.info("--------------------------------------");
-                        log.info("Agent ID: " + agentObject.agentId);
-                        log.info("Image count: " + agentObject.imageCount);
-                        log.info("Video count: " + agentObject.videoCount);
-                        log.info("--------------------------------------");
+                        agentObject = getBlobDetailsFromAgent(jsonAgent, agentIdKey);
                     }
                 }
             } catch (Exception e) {
@@ -160,29 +155,56 @@ public class DelhpiService extends AbsractServicesBaseClass {
             log.info(statusCode);
         }
         EntityUtils.consume(entity);
+        return agentObject;
     }
 
 
+    public void runDelphiClient(String email) {
+
+        try {
+            // Trust all certs
+            SSLContext sslcontext = buildSSLContext();
+            // Allow TLSv1 protocol only
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext,
+                    new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+            //build a HTTP client with all the above
+            httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+            ArrayList<String> meshIDs = AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email).get("mesh_ids");
+
+            if (meshIDs.size() != 0) {
+                agentObject = DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, meshIDs.get(0));
+
+                log.info("--------------------------------------");
+                log.info("Was Online: " + agentObject.wasOnline);
+                log.info("Last Seen: " + agentObject.lastSeen);
+                log.info("Agent Type: " + agentObject.deviceClass);
+                log.info("Agent ID: " + agentObject.agentId);
+                log.info("Image count: " + agentObject.imageCount);
+                log.info("Video count: " + agentObject.videoCount);
+                log.info("--------------------------------------");
+            }
+        } catch (IndexOutOfBoundsException iob) {
+            iob.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        // Trust all certs
-        SSLContext sslcontext = buildSSLContext();
 
-        // Allow TLSv1 protocol only
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext, new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        String email = "mmadhusoodan+empty@lyveminds.com";
+        //String email = "mmadhusoodan+multiple@lyveminds.com";
+        //String email = "mmadhusoodan+events@lyveminds.com";
 
-        //build a HTTP client with all the above
-        httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-
-        //String email = "a@lyveminds.com";
-        //ArrayList<String> meshIDs = AccountsService.getInstance().getAccountDetailsFromEmail(httpclient, email).get("mesh_ids");
-
-        //DelhpiService.getInstance().getMeshInfoFromMeshId(httpclient, meshIDs.get(0));
+        DelhpiService.getInstance().runDelphiClient(email);
 
         //One Agent
         //DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, "E89EC84A-3A3E-44FD-8863-F510E2754ED0");
 
         //Multiple Agent
-        DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, "8D30F010-F1C8-4BDF-B11E-F6BC7EB511DF");
+        //DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, "8D30F010-F1C8-4BDF-B11E-F6BC7EB511DF");
 
     }
 }

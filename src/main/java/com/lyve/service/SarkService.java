@@ -130,7 +130,7 @@ public class SarkService extends AbsractServicesBaseClass {
         }
 
         String email = "mmadhusoodan+avery@lyveminds.com";
-        //ArrayList<String> meshIDs = AccountsService.getInstance().getAccountDetailsFromEmail(httpclient, email).get("mesh_ids");
+        //ArrayList<String> meshIDs = AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email).get("mesh_ids");
 
         SarkService.getInstance().getMeshInfoFromMeshId(httpclient, "EE9A3D25-D9AC-4763-B244-887FCE7183C2");
 

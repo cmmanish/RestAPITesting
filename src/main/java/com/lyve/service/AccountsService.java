@@ -28,13 +28,14 @@ public class AccountsService extends AbsractServicesBaseClass {
     private static AccountsService instance;
 
     public static synchronized AccountsService getInstance() {
+        log.info("In AccountsService() constructor");
         if (instance == null) {
             instance = new AccountsService();
         }
         return instance;
     }
 
-    public Map<String, ArrayList> getAccountDetailsFromEmail(CloseableHttpClient httpclient, String email) throws Exception {
+    public Map<String, ArrayList> getAccountDetailsAsMapFromEmail(CloseableHttpClient httpclient, String email) throws Exception {
 
         String URL = "https://accounts.dogfood.blackpearlsystems.net/accounts/emails/" + email;
         HttpGet httpget = new HttpGet(URL);
@@ -93,7 +94,7 @@ public class AccountsService extends AbsractServicesBaseClass {
 
     public static void main(String[] args) throws Exception {
 
-        String email = "mmadhusoodan+avery@lyveminds.com";
+        String email = "mmadhusoodan+profiletest@lyveminds.com";
         try {
             // Trust all certs
             SSLContext sslcontext = buildSSLContext();
@@ -107,9 +108,9 @@ public class AccountsService extends AbsractServicesBaseClass {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        AccountsService.getInstance().getAccountDetailsFromEmail(httpclient, email);
-        Map<String, ArrayList> accounts = AccountsService.getInstance().getAccountDetailsFromEmail(httpclient, email);
-        log.info(accounts.get("mesh_ids"));
+        AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email);
+        Map<String, ArrayList> accounts = AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email);
+        log.info("mesh_ids: "+accounts.get("mesh_ids"));
 
 
     }
