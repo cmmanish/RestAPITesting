@@ -92,9 +92,8 @@ public class AccountsService extends AbsractServicesBaseClass {
         return AccountsJSONArrayList;
     }
 
-    public static void main(String[] args) throws Exception {
+    public void runAccountsClient(String email) throws Exception {
 
-        String email = "mmadhusoodan+profiletest@lyveminds.com";
         try {
             // Trust all certs
             SSLContext sslcontext = buildSSLContext();
@@ -108,10 +107,18 @@ public class AccountsService extends AbsractServicesBaseClass {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email);
         Map<String, ArrayList> accounts = AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email);
-        log.info("mesh_ids: "+accounts.get("mesh_ids"));
+        log.info("mesh_ids: " + accounts.get("mesh_ids"));
 
 
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        String email = "mmadhusoodan+emptymesh@lyveminds.com";
+        //String email = "mmadhusoodan+multiple@lyveminds.com";
+        //String email = "mmadhusoodan+events@lyveminds.com";
+
+        AccountsService.getInstance().runAccountsClient(email);
     }
 }

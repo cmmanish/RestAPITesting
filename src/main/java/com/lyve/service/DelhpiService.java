@@ -194,7 +194,7 @@ public class DelhpiService extends AbsractServicesBaseClass {
 
     public static void main(String[] args) throws Exception {
 
-        String email = "mmadhusoodan+empty@lyveminds.com";
+        String email = "mmadhusoodan+emptymesh@lyveminds.com";
         //String email = "mmadhusoodan+multiple@lyveminds.com";
         //String email = "mmadhusoodan+events@lyveminds.com";
 
