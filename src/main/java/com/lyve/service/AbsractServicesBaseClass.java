@@ -40,9 +40,9 @@ public class AbsractServicesBaseClass {
         return sslcontext;
     }
 
-    protected AgentObject agentObject;
+    protected AgentObject agentObject = AgentObject.getInstance();
 
-    protected MeshObject meshObject;
+    protected MeshObject meshObject = MeshObject.getInstance();
 
     //Methods
 

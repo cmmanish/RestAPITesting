@@ -7,5 +7,15 @@ import java.util.List;
  */
 public class MeshObject {
 
+    private static MeshObject instance;
+
     private List<AgentObject> agentObjectList;
+
+    public static synchronized MeshObject getInstance() {
+
+        if (instance == null) {
+            instance = new MeshObject();
+        }
+        return instance;
+    }
 }

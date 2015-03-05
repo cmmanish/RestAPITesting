@@ -5,7 +5,10 @@ package com.lyve.service;
  */
 
 import com.lyve.service.object.AgentObject;
-import org.apache.http.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -18,8 +21,11 @@ import org.json.simple.parser.JSONParser;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +34,7 @@ public class DelhpiService extends AbsractServicesBaseClass {
 
     private static DelhpiService instance;
     private static CloseableHttpClient httpclient;
+    protected List<AgentObject> agentObjectList = new ArrayList<AgentObject>();
 
     public static synchronized DelhpiService getInstance() {
 
@@ -38,7 +45,7 @@ public class DelhpiService extends AbsractServicesBaseClass {
         return instance;
     }
 
-    public AgentObject getBlobDetailsFromAgent(JSONObject jAgent, Object OAgentId) {
+    public AgentObject getAgentObjectFromAgent(JSONObject jAgent, Object OAgentId) {
 
         //AgentObject agentObject = new AgentObject();
         agentObject.agentId = (String) OAgentId;
@@ -94,11 +101,35 @@ public class DelhpiService extends AbsractServicesBaseClass {
         return agentObject;
     }
 
-    public AgentObject getBlobDetailsFromMeshId(CloseableHttpClient httpclient, String meshId) throws Exception {
+    public String getJSONFromFile(String file) throws Exception {
 
-        String URL = "https://delphi.dogfood.blackpearlsystems.net/delphi/rest/v2/meshstats/" + meshId;
+        String jsonData = "";
+        BufferedReader br = null;
+        try {
+            String line;
+            //br = new BufferedReader(new FileReader("meshStatsMultiple.json"));
+            br = new BufferedReader(new FileReader(file));
+            while ((line = br.readLine()) != null) {
+                jsonData += line + "\n";
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return jsonData;
+    }
+
+
+    public String getJSONFromURL(CloseableHttpClient httpclient, String URL, String meshId) throws Exception {
+
         HttpGet httpGet = new HttpGet(URL);
-
+        String resultJSONString = "";
         httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
         httpGet.addHeader("X-BP-Envelope", "EgIIARoBMQ==");
 
@@ -116,11 +147,13 @@ public class DelhpiService extends AbsractServicesBaseClass {
             log.info("Response content length: " + entity.getContentLength());
         }
 
-        for (Header header : httpResponse.getAllHeaders()) {
-            log.info(header);
-        }
+//        for (Header header : httpResponse.getAllHeaders()) {
+//            log.info(header);
+//        }
         log.info("----------------------------------------");
+
         if (statusCode == HttpStatus.SC_OK) {
+
             try {
                 BufferedReader rd = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
                 StringBuffer resultJSON = new StringBuffer();
@@ -128,23 +161,7 @@ public class DelhpiService extends AbsractServicesBaseClass {
                 while ((line = rd.readLine()) != null) {
                     resultJSON.append(line);
                 }
-                log.info("resultJSON: " + resultJSON.toString());
-
-                JSONParser parser = new JSONParser();
-                Object obj = parser.parse(resultJSON.toString());
-                JSONObject level1Object = (JSONObject) obj;
-                log.info("mesh_status: " + level1Object.get("mesh_status"));
-                JSONObject agentStatsJSONObject = (JSONObject) level1Object.get("agent_stats");
-
-                if (agentStatsJSONObject instanceof Map) {
-                    Set keySet = agentStatsJSONObject.keySet();
-                    log.info("Agent Count : " + keySet.size());
-
-                    for (Object agentIdKey : keySet) {
-                        JSONObject jsonAgent = (JSONObject) agentStatsJSONObject.get(agentIdKey);
-                        agentObject = getBlobDetailsFromAgent(jsonAgent, agentIdKey);
-                    }
-                }
+                resultJSONString = resultJSON.toString();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -154,13 +171,40 @@ public class DelhpiService extends AbsractServicesBaseClass {
         } else {
             log.info(statusCode);
         }
+        log.info("resultJSON: " + resultJSONString);
         EntityUtils.consume(entity);
-        return agentObject;
+        return resultJSONString;
+    }
+
+    public List<AgentObject> getAgentObjectListFromMeshId(CloseableHttpClient httpclient, String meshId) throws Exception {
+
+        String URL = "https://delphi.dogfood.blackpearlsystems.net/delphi/rest/v2/meshstats/" + meshId;
+
+        //String resultJSON = getJSONFromURL(httpclient, URL, meshId);
+        String resultJSON = getJSONFromFile("meshStatsMultiple.json");
+        JSONParser parser = new JSONParser();
+        Object obj = parser.parse(resultJSON);
+        JSONObject level1Object = (JSONObject) obj;
+        log.info("mesh_status: " + level1Object.get("mesh_status"));
+        JSONObject agentStatsJSONObject = (JSONObject) level1Object.get("agent_stats");
+
+        if (agentStatsJSONObject instanceof Map) {
+            Set AgentkeySet = agentStatsJSONObject.keySet();
+            log.info("Agent Count : " + AgentkeySet.size());
+
+            for (Object agentId : AgentkeySet) {
+                JSONObject jsonAgent = (JSONObject) agentStatsJSONObject.get(agentId);
+                agentObject = getAgentObjectFromAgent(jsonAgent, agentId);
+                agentObjectList.add(agentObject);
+            }
+        }
+        return agentObjectList;
     }
 
 
-    public void runDelphiClient(String email) {
+    public void runDelphiClientWithEmail(String email) {
 
+        //takes email, gets the mesh_ids and gets agentObjectList which can then be iterated for each AgentObject
         try {
             // Trust all certs
             SSLContext sslcontext = buildSSLContext();
@@ -174,37 +218,71 @@ public class DelhpiService extends AbsractServicesBaseClass {
             ArrayList<String> meshIDs = AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email).get("mesh_ids");
 
             if (meshIDs.size() != 0) {
-                agentObject = DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, meshIDs.get(0));
+                agentObjectList = DelhpiService.getInstance().getAgentObjectListFromMeshId(httpclient, meshIDs.get(0));
 
-                log.info("--------------------------------------");
-                log.info("Was Online: " + agentObject.wasOnline);
-                log.info("Last Seen: " + agentObject.lastSeen);
-                log.info("Agent Type: " + agentObject.deviceClass);
-                log.info("Agent ID: " + agentObject.agentId);
-                log.info("Image count: " + agentObject.imageCount);
-                log.info("Video count: " + agentObject.videoCount);
-                log.info("--------------------------------------");
+                for (AgentObject agentObject : agentObjectList) {
+                    log.info(agentObject);
+
+                    log.info("--------------------------------------");
+                    log.info("Agent Was Online: " + agentObject.wasOnline);
+                    log.info("Agent Last Seen: " + agentObject.lastSeen);
+                    log.info("Agent Type: " + agentObject.deviceClass);
+                    log.info("Agent ID: " + agentObject.agentId);
+                    log.info("Agent Image count: " + agentObject.imageCount);
+                    log.info("Agent Video count: " + agentObject.videoCount);
+                    log.info("--------------------------------------");
+                }
             }
         } catch (IndexOutOfBoundsException iob) {
             iob.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void runDelphiClientWithMeshId(String meshId) {
+
+        //takes email, gets the mesh_ids and gets agentObjectList which can then be iterated for each AgentObject
+        try {
+            // Trust all certs
+            SSLContext sslcontext = buildSSLContext();
+            // Allow TLSv1 protocol only
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext,
+                    new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+            //build a HTTP client with all the above
+            httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+            agentObjectList = DelhpiService.getInstance().getAgentObjectListFromMeshId(httpclient, meshId);
+
+            for (AgentObject agentObject : agentObjectList) {
+
+                log.info("--------------------------------------");
+                log.info("Agent Was Online: " + agentObject.wasOnline);
+                log.info("Agent Last Seen: " + agentObject.lastSeen);
+                log.info("Agent Type: " + agentObject.deviceClass);
+                log.info("Agent ID: " + agentObject.agentId);
+                log.info("Agent Image count: " + agentObject.imageCount);
+                log.info("Agent Video count: " + agentObject.videoCount);
+                log.info("--------------------------------------");
+            }
+
+        } catch (IndexOutOfBoundsException iob) {
+            iob.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void main(String[] args) throws Exception {
 
-        String email = "mmadhusoodan+emptymesh@lyveminds.com";
+        //String email = "mmadhusoodan+emptymesh@lyveminds.com";
         //String email = "mmadhusoodan+multiple@lyveminds.com";
-        //String email = "mmadhusoodan+events@lyveminds.com";
+        String email = "mmadhusoodan+averyita@lyveminds.com";
 
-        DelhpiService.getInstance().runDelphiClient(email);
-
-        //One Agent
-        //DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, "E89EC84A-3A3E-44FD-8863-F510E2754ED0");
-
-        //Multiple Agent
-        //DelhpiService.getInstance().getBlobDetailsFromMeshId(httpclient, "8D30F010-F1C8-4BDF-B11E-F6BC7EB511DF");
-
+        //DelhpiService.getInstance().runDelphiClientWithEmail(email);
+        DelhpiService.getInstance().runDelphiClientWithMeshId("DE12719E-F84F-484A-B7BB-3B49D11C1874");
     }
 }
