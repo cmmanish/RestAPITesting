@@ -1,6 +1,5 @@
 package example;
 
-import com.oracle.javafx.jmx.json.JSONException;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -43,7 +42,7 @@ public class ParseJSONExample {
         return "imageCount=" + imageCount + "&videoCount=" + videoCount;
     }
 
-    public static void main(String[] args) throws FileNotFoundException, JSONException {
+    public static void main(String[] args) throws FileNotFoundException {
         String jsonData = "";
         String imageVideoCount = "";
         BufferedReader br = null;

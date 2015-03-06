@@ -5,7 +5,7 @@ package com.lyve.service.object;
  */
 public class AgentObject {
 
-    private static AgentObject instance;
+    private AgentObject instance;
     public String agentId = "";
     public Long imageCount = 0l;
     public Long videoCount = 0l;
@@ -13,7 +13,7 @@ public class AgentObject {
     public String lastSeen = "";
     public boolean wasOnline = false;
 
-    public static synchronized AgentObject getInstance() {
+    public synchronized AgentObject newInstance() {
 
         if (instance == null) {
             instance = new AgentObject();

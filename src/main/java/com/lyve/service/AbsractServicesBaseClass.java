@@ -1,7 +1,5 @@
 package com.lyve.service;
 
-import com.lyve.service.object.AgentObject;
-import com.lyve.service.object.MeshObject;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,7 +18,7 @@ import java.util.Locale;
 /**
  * Created by mmadhusoodan on 2/27/15.
  */
-public class AbsractServicesBaseClass {
+abstract public class AbsractServicesBaseClass {
 
     protected static CloseableHttpClient httpclient;
 
@@ -39,10 +37,7 @@ public class AbsractServicesBaseClass {
                 .build();
         return sslcontext;
     }
-
-    protected AgentObject agentObject = AgentObject.getInstance();
-
-    protected MeshObject meshObject = MeshObject.getInstance();
+//    protected MeshObject meshObject = MeshObject.getInstance();
 
     //Methods
 
