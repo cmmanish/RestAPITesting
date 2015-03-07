@@ -5,13 +5,23 @@ package com.lyve.service.object;
  */
 public class AgentObject {
 
-    private AgentObject instance;
+    public AgentObject instance;
     public String agentId = "";
+
+    public String deviceClass = "";
+    public String displayName = "";
+    public String devicePlatform = "";
+    public String deviceType = "";
+
+    public long storageCapacityTotalBytes ;
+    public String lastSeen = "";
+
+    public boolean wasOnline = false;
+    public boolean isReplicationTarget = false;
+
+
     public Long imageCount = 0l;
     public Long videoCount = 0l;
-    public String deviceClass = "";
-    public String lastSeen = "";
-    public boolean wasOnline = false;
 
     public synchronized AgentObject newInstance() {
 
