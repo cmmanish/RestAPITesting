@@ -2,3 +2,5 @@
 RestAPITesting.iml
 /build/
 /.gradle/
+.gradle/2.1
+.gitignore.swp

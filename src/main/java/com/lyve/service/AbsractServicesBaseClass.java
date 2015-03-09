@@ -6,6 +6,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -20,12 +23,11 @@ import java.util.Locale;
 /**
  * Created by mmadhusoodan on 2/27/15.
  */
-public class AbsractServicesBaseClass {
+public abstract class AbsractServicesBaseClass {
     private static Logger log = Logger.getLogger(DelhpiService.class);
 
     protected static CloseableHttpClient httpclient;
     protected static String DATEFORMAT = "MM-dd-yyyy HH:mm:ss";
-    protected static String token = "MSwxLFJEajcxcGw4bW5Fdm9hdFp4K25keUE9PSxVYXBvWVF4N2pFUFFVYWlJL01aUnlkREpGbWlCRm9hTmtTdGU1YlFSNEs4QWE3bnEwY3Q1Qnh4WFREZ2l1QXFqZS85TVF0bVI2QW1VNXc3c2JBVitTTkJYb1pGclMzNGZxV25IV2pzc1BkRDBQb3dsQXJDaDdPalM1VXB2SDlxbkVDQzdOWnZZUWx4SUREYlNFcTNaRXh3TzlqNUVzQU9Zb2RXcjVVcWZqUVU9";
 
     //todo get token from Token service
     protected static SSLContext buildSSLContext()
@@ -50,6 +52,14 @@ public class AbsractServicesBaseClass {
         SimpleDateFormat format = new SimpleDateFormat(DATEFORMAT, Locale.getDefault());
 
         return format.format(date);
+    }
+
+    public static String getAccessToken() {
+
+        String token = "MSwxLEthbzdYWUNhYXdISjNnN1c5d083Unc9PSxPUmxYWFBPYm9SQ0MyQlJIOGo4TjNoejkvc1lSL1pMck0zYitzb2JLeHg1" +
+                "Z1NBb2VLTHBERGJtMGVlVUpjSzJHa1hyczkzSWUyVm16V1JiUjlJOWhETko1UXM3Mm01VEswSnpKeUlEazNSVVEwWHkvMSt6NlA1TUpi" +
+                "dk9EUnpvUjM4TDlEUk5FWTRtdytZeEczeUVHNjUzZzlJRTk2bTM2eU03aFcwaFJkbkk9";
+        return token;
     }
 
     public static String getDeviceLastSeen(long epochSec) {
@@ -96,10 +106,37 @@ public class AbsractServicesBaseClass {
 
     }
 
+
     public static String getCurrentDateAndTime() {
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         return dateFormat.format(date).toString();
     }
 
+    public String getJSONFromFile(String file) throws Exception {
+
+        String jsonData = "";
+        BufferedReader br = null;
+        try {
+            String line;
+            //br = new BufferedReader(new FileReader("meshStatsMultiple.json"));
+            br = new BufferedReader(new FileReader(file));
+            while ((line = br.readLine()) != null) {
+                jsonData += line + "\n";
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return jsonData;
+    }
+
+
 }
+

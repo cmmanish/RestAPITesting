@@ -76,7 +76,7 @@ public class SarkService extends AbsractServicesBaseClass {
         String resultJSONString = "";
         httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
         httpGet.addHeader("X-BP-Envelope", "EgIIARoBMQ==");
-        httpGet.addHeader("X-BP-Token", token);
+        httpGet.addHeader("X-BP-Token", getAccessToken());
 
         CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
 
@@ -144,7 +144,7 @@ public class SarkService extends AbsractServicesBaseClass {
         return agentObject;
     }
 
-    public void runSarkClientWithEmail(String email) {
+    public void getAgentFromSarkClientWithEmail(String email) {
         //takes email, gets the mesh_ids and gets agentObjectList which can then be iterated for each AgentObject
         try {
             // Trust all certs
@@ -187,18 +187,9 @@ public class SarkService extends AbsractServicesBaseClass {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public void getDeviceDetailsFromSarkClientWithMeshId(String meshId) {
 
-        //String email = "mmadhusoodan+emptymesh@lyveminds.com";
-        //String email = "mmadhusoodan+multiple@lyveminds.com";
-        //String email = "mmadhusoodan+morgan@lyveminds.com";
-        //String email = "mmadhusoodan+ita@lyveminds.com";
-        String email = "mmadhusoodan+events@lyveminds.com";
-
-        String meshId = "DE12719E-F84F-484A-B7BB-3B49D11C1874";
-
-        //SarkService.getInstance().runSarkClientWithEmail(email);
-        ArrayList agentList = DelhpiService.getInstance().getAgentListWithMeshId("DE12719E-F84F-484A-B7BB-3B49D11C1874");
+        ArrayList agentList = DelhpiService.getInstance().getAgentListWithMeshId(meshId);
         String agentId = "";
 
         for (int i = 0; i < agentList.size(); i++) {
@@ -214,6 +205,7 @@ public class SarkService extends AbsractServicesBaseClass {
             log.info(agent.isReplicationTarget);
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         }
+
     }
 
 }

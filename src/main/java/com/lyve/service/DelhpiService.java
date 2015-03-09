@@ -21,8 +21,6 @@ import org.json.simple.parser.JSONParser;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Map;
@@ -100,37 +98,13 @@ public class DelhpiService extends AbsractServicesBaseClass {
         return agentObject;
     }
 
-    public String getJSONFromFile(String file) throws Exception {
-
-        String jsonData = "";
-        BufferedReader br = null;
-        try {
-            String line;
-            //br = new BufferedReader(new FileReader("meshStatsMultiple.json"));
-            br = new BufferedReader(new FileReader(file));
-            while ((line = br.readLine()) != null) {
-                jsonData += line + "\n";
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (br != null)
-                    br.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        return jsonData;
-    }
-
-
     public String getJSONFromURL(CloseableHttpClient httpclient, String URL, String meshId) throws Exception {
 
         HttpGet httpGet = new HttpGet(URL);
         String resultJSONString = "";
         httpGet.setHeader(HttpHeaders.ACCEPT, "application/json");
         httpGet.addHeader("X-BP-Envelope", "EgIIARoBMQ==");
+        httpGet.addHeader("X-BP-Token", getAccessToken());
 
         CloseableHttpResponse httpResponse = httpclient.execute(httpGet);
 
@@ -219,8 +193,7 @@ public class DelhpiService extends AbsractServicesBaseClass {
         return agentList;
     }
 
-    public void runSarkClientWithEmail(String email) {
-
+    public void getAgentFromSarkClientWithEmail(String email) {
         //takes email, gets the mesh_ids and gets agentObjectList which can then be iterated for each AgentObject
         try {
             // Trust all certs
@@ -228,19 +201,14 @@ public class DelhpiService extends AbsractServicesBaseClass {
             // Allow TLSv1 protocol only
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext,
                     new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
             //build a HTTP client with all the above
             httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 
             Map<String, ArrayList> accountServiceMap = AccountsService.getInstance().getAccountDetailsAsMapFromEmail(httpclient, email);
             if ((accountServiceMap.get("code")) != null) {
                 log.info(accountServiceMap.get("message"));
-
             } else {
-
                 ArrayList<String> meshIDs = accountServiceMap.get("mesh_ids");
-
-                //meshIDs.isEmpty() &&
                 if (meshIDs.size() != 0) {
                     ArrayList<AgentObject> agentObjectList = DelhpiService.getInstance().getAgentObjectListFromMeshId(httpclient, meshIDs.get(0));
 
@@ -261,26 +229,21 @@ public class DelhpiService extends AbsractServicesBaseClass {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public void runDelphiClientWithMeshId(String meshId) {
-
-        //takes email, gets the mesh_ids and gets agentObjectList which can then be iterated for each AgentObject
+    public void getAgentFromSarkClientWithMeshId(String meshId) {
+        //takes mesh_ids and gets agentObjectList which can then be iterated for each AgentObject
         try {
             // Trust all certs
             SSLContext sslcontext = buildSSLContext();
             // Allow TLSv1 protocol only
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext,
                     new String[]{"TLSv1"}, null, SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
             //build a HTTP client with all the above
             httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-
             agentObjectList = DelhpiService.getInstance().getAgentObjectListFromMeshId(httpclient, meshId);
 
             for (AgentObject agentObject : agentObjectList) {
-
                 log.info("--------------------------------------");
                 log.info("Agent Was Online: " + agentObject.wasOnline);
                 log.info("Agent Last Seen: " + agentObject.lastSeen);
@@ -296,7 +259,6 @@ public class DelhpiService extends AbsractServicesBaseClass {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public static void main(String[] args) throws Exception {
@@ -305,10 +267,10 @@ public class DelhpiService extends AbsractServicesBaseClass {
         //String email = "mmadhusoodan+multiple@lyveminds.com";
 //        String email = "mmadhusoodan+morgan@lyveminds.com";
         //String email = "mmadhusoodan+ita@lyveminds.com";
-        String email = "mmadhusoodan+events@lyveminds.com";
+        String email = "mmadhusoodan+avery@lyveminds.com";
 
-        DelhpiService.getInstance().runSarkClientWithEmail(email);
+        DelhpiService.getInstance().getAgentFromSarkClientWithEmail(email);
         //DelhpiService.getInstance().getAgentListWithMeshId("DE12719E-F84F-484A-B7BB-3B49D11C1874");
-        //DelhpiService.getInstance().runDelphiClientWithMeshId("EE9A3D25-D9AC-4763-B244-887FCE7183C2");
+        //DelhpiService.getInstance().getAgentFromSarkClientWithMeshId("EE9A3D25-D9AC-4763-B244-887FCE7183C2");
     }
 }
